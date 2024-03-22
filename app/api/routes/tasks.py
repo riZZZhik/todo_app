@@ -1,6 +1,6 @@
 """This module defines the routes for the tasks API."""
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, HTTPException, status
 
 from ...database import TasksDatabase, get_db
 from ...models import Task, UpdateTask
@@ -38,7 +38,11 @@ def get_task(task_id: int, db: TasksDatabase = Depends(get_db)) -> Task:
     Returns:
         The task with the given ID.
     """
-    return db.get_task(task_id)
+    task = db.get_task(task_id)
+    if task:
+        return task
+
+    raise HTTPException(status_code=404, detail="Task not found")
 
 
 @router.get("", response_model=list[Task], name="tasks:get_tasks")

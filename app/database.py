@@ -66,15 +66,16 @@ class TasksDatabase:
         """Retrieve a task from the database."""
         self.cursor.execute("SELECT * FROM tasks WHERE id = ?", (task_id,))
         task = self.cursor.fetchone()
-        return Task(
-            task_id=task[0],
-            title=task[1],
-            description=task[2],
-            status=task[3],
-            priority=task[4],
-            created_at=task[5],
-            updated_at=task[6],
-        )
+        if task:
+            return Task(
+                task_id=task[0],
+                title=task[1],
+                description=task[2],
+                status=task[3],
+                priority=task[4],
+                created_at=task[5],
+                updated_at=task[6],
+            )
 
     def get_all_tasks(self) -> list[Task]:
         """Retrieve all tasks from the database."""
