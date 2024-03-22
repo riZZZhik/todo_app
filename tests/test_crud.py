@@ -58,7 +58,7 @@ def test_update_task(client) -> None:
 
 
 def test_update_task_not_found(client) -> None:
-    respose = client.put(
+    response = client.put(
         "/tasks/-1",
         json={"title": "updated task", "description": "updated description"},
     )
