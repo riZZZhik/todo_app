@@ -1,3 +1,5 @@
+"""Defines the models used in the application."""
+
 from datetime import datetime
 from enum import Enum
 

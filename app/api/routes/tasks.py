@@ -1,13 +1,15 @@
+"""This module defines the routes for the tasks API."""
+
 from fastapi import APIRouter, Depends
 
-from ...database import get_db
+from ...database import TasksDatabase, get_db
 from ...models import Task, UpdateTask
 
 router = APIRouter()
 
 
 @router.post("", response_model=Task, name="tasks:create_task")
-def create_task(task: Task, db=Depends(get_db)):
+def create_task(task: Task, db: TasksDatabase = Depends(get_db)) -> Task:
     """Create a new task.
 
     Args:
@@ -16,13 +18,16 @@ def create_task(task: Task, db=Depends(get_db)):
 
     Returns:
         The created task object.
-
     """
     return db.create_task(task)
 
 
 @router.get("", response_model=list[Task], name="tasks:get_tasks")
-def read_tasks(sort_by: str | None = None, top_n: int = None, db=Depends(get_db)):
+def read_tasks(
+    sort_by: str | None = None,
+    top_n: int | None = None,
+    db: TasksDatabase = Depends(get_db),
+) -> list[Task]:
     """Retrieve a list of tasks.
 
     Args:
@@ -42,23 +47,25 @@ def read_tasks(sort_by: str | None = None, top_n: int = None, db=Depends(get_db)
 
     match sort_by:
         case "title":
-            tasks = sorted(tasks, key=lambda task: task.title)
+            tasks.sort(key=lambda task: task.title)
         case "status":
-            tasks = sorted(tasks, key=lambda task: task.status, reverse=False)
+            tasks.sort(key=lambda task: task.status, reverse=True)
         case "created_at":
-            tasks = sorted(tasks, key=lambda task: task.created_at)
+            tasks.sort(key=lambda task: task.created_at)
         case "priority":
             pass
         case _:
-            tasks = sorted(tasks, key=lambda task: task.task_id, reverse=True)
+            tasks.sort(key=lambda task: task.task_id, reverse=True)
 
     return tasks
 
 
 @router.get("/find", response_model=list[Task], name="tasks:find_task")
 def find_tasks(
-    subtitle: str | None = None, subdesc: str | None = None, db=Depends(get_db)
-):
+    subtitle: str | None = None,
+    subdesc: str | None = None,
+    db: TasksDatabase = Depends(get_db),
+) -> list[Task]:
     """Find tasks by substring in their description.
 
     Args:
@@ -74,7 +81,9 @@ def find_tasks(
 
 
 @router.put("/{task_id}", response_model=Task, name="tasks:update_task")
-def update_task(task_id: int, updated_task: UpdateTask, db=Depends(get_db)):
+def update_task(
+    task_id: int, updated_task: UpdateTask, db: TasksDatabase = Depends(get_db)
+) -> Task:
     """Update task with the given task_id in the database.
 
     Args:
@@ -83,14 +92,13 @@ def update_task(task_id: int, updated_task: UpdateTask, db=Depends(get_db)):
 
     Returns:
         The updated task.
-
     """
     task = db.update_task(task_id, updated_task)
     return task
 
 
 @router.delete("/{task_id}", name="tasks:delete_task")
-def delete_task(task_id: int, db=Depends(get_db)):
+def delete_task(task_id: int, db: TasksDatabase = Depends(get_db)) -> dict[str, str]:
     """Delete task by ID.
 
     Parameters:
@@ -101,4 +109,4 @@ def delete_task(task_id: int, db=Depends(get_db)):
         A dictionary with a message indicating the task has been deleted.
     """
     db.delete_task(task_id)
-    return {"message": "Task deleted"}
+    return {"message": f"Task {task_id} deleted"}

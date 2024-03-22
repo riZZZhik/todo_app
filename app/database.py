@@ -1,4 +1,7 @@
+"""This module contains the TasksDatabase, which is used to interact with the SQLite database."""
+
 import sqlite3
+from typing import Any, Generator
 
 from .models import Task, UpdateTask
 
@@ -6,13 +9,17 @@ from .models import Task, UpdateTask
 class TasksDatabase:
     """A class representing a tasks database."""
 
-    def __init__(self, database_name):
-        """Initialize the TasksDatabase instance."""
-        self.conn = sqlite3.connect(database_name)
+    def __init__(self, database_file: str) -> None:
+        """Initialize the TasksDatabase instance.
+
+        Args:
+            database_file: The path to the SQLite database file.
+        """
+        self.conn = sqlite3.connect(database_file)
         self.cursor = self.conn.cursor()
         self._create_tasks_table()
 
-    def _create_tasks_table(self):
+    def _create_tasks_table(self) -> None:
         """Create the tasks table if it doesn't exist."""
         self.cursor.execute(
             """CREATE TABLE IF NOT EXISTS tasks (
@@ -30,14 +37,12 @@ class TasksDatabase:
         """Generate a unique ID for a task."""
         self.cursor.execute("SELECT MAX(id) FROM tasks")
         result = self.cursor.fetchone()
-        print(result)
         max_id = result[0] if len(result) else -1
         return max_id + 1
 
-    def create_task(self, task: Task):
+    def create_task(self, task: Task) -> Task:
         """Insert a task into the database."""
         task.task_id = self._generate_id()
-        print(task)
         self.cursor.execute(
             """INSERT INTO tasks (id, title, description, status, created_at, priority)
                           VALUES (?, ?, ?, ?, ?, ?)""",
@@ -54,12 +59,10 @@ class TasksDatabase:
 
         return task
 
-    def get_task(self, task_id) -> Task:
+    def get_task(self, task_id: int) -> Task:
         """Retrieve a task from the database."""
-
         self.cursor.execute("SELECT * FROM tasks WHERE id = ?", (task_id,))
         task = self.cursor.fetchone()
-        print(task)
         return Task(
             task_id=task[0],
             title=task[1],
@@ -85,7 +88,7 @@ class TasksDatabase:
             for task in tasks
         ]
 
-    def update_task(self, task_id: int, updated_task: UpdateTask):
+    def update_task(self, task_id: int, updated_task: UpdateTask) -> Task:
         """Update a task in the database."""
         update_values = []
         if updated_task.title is not None:
@@ -98,15 +101,13 @@ class TasksDatabase:
             update_values.append(f"priority={updated_task.priority.value}")
 
         if update_values:
-            update_query = (
-                "UPDATE tasks SET " + ", ".join(update_values) + f" WHERE id={task_id}"
-            )
+            update_query = "UPDATE tasks SET " + ", ".join(update_values) + f" WHERE id={task_id}"
             self.cursor.execute(update_query)
             self.conn.commit()
 
         return self.get_task(task_id)
 
-    def delete_task(self, task_id: int):
+    def delete_task(self, task_id: int) -> None:
         """Delete a task from the database."""
         self.cursor.execute("DELETE FROM tasks WHERE id = ?", (task_id,))
         self.conn.commit()
@@ -133,7 +134,7 @@ class TasksDatabase:
         ]
 
 
-def get_db():
+def get_db() -> Generator[TasksDatabase, Any, None]:
     """Get a TasksDatabase instance."""
     db = TasksDatabase("tasks.db")
     try:
