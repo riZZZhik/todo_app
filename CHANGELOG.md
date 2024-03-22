@@ -4,9 +4,10 @@
 
 ### Added
 
-- Tests [!2](https://github.com/riZZZhik/todo_app/pull/2)
 - `/health` route [!2](https://github.com/riZZZhik/todo_app/pull/2)
 - `updated_at` field to task [!2](https://github.com/riZZZhik/todo_app/pull/2)
+- Tests [!2](https://github.com/riZZZhik/todo_app/pull/2)
+- CI for linters and tests [!2](https://github.com/riZZZhik/todo_app/pull/2)
 
 ### Fixed
 
