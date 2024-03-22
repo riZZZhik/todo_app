@@ -1,0 +1,41 @@
+name: Tests
+
+on:
+  push:
+    branches:
+      - "master"
+
+  pull_request:
+    branches:
+      - "*"
+
+jobs:
+  tests:
+    name: Run tests
+
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Poetry
+        run: pipx install poetry
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: poetry
+
+      - name: Set Poetry environment
+        run: poetry env use 3.11
+
+      - name: Install dependencies
+        run: poetry install --with tests,dev --no-root
+
+      - Run linters
+        run: make lint
+
+      - name: Run tests
+        run: make test

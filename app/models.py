@@ -32,6 +32,7 @@ class Task(BaseModel):
     status: StatusEnum = StatusEnum.TODO
     priority: PriorityEnum = PriorityEnum.LOW
     created_at: str = Field(default_factory=lambda: str(datetime.now()))
+    updated_at: str = Field(default_factory=lambda: str(datetime.now()))
 
 
 class UpdateTask(BaseModel):
@@ -41,3 +42,4 @@ class UpdateTask(BaseModel):
     description: str | None = None
     status: str | None = None
     priority: PriorityEnum | None = None
+    updated_at: str = Field(default_factory=lambda: str(datetime.now()))

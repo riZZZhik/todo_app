@@ -6,7 +6,6 @@ tasks.db
 .vscode/settings.json
 
 # Python ignores
-poetry.lock
 __pycache__/
 dist/
 venv/

@@ -1,6 +1,7 @@
 """This module contains the TasksDatabase, which is used to interact with the SQLite database."""
 
 import sqlite3
+from enum import Enum
 from typing import Any, Generator
 
 from .models import Task, UpdateTask
@@ -27,50 +28,59 @@ class TasksDatabase:
                             title TEXT,
                             description TEXT,
                             status TEXT,
+                            priority INTEGER,
                             created_at TEXT,
-                            priority INTEGER
+                            updated_at TEXT
                         )"""
         )
+        self.conn.commit()
+
+    def _clear_tasks_table(self) -> None:
+        """Clear the tasks table."""
+        self.cursor.execute("DELETE FROM tasks")
         self.conn.commit()
 
     def _generate_id(self) -> int:
         """Generate a unique ID for a task."""
         self.cursor.execute("SELECT MAX(id) FROM tasks")
         result = self.cursor.fetchone()
-        max_id = result[0] if len(result) else -1
+        max_id = result[0] or 0
         return max_id + 1
 
     def create_task(self, task: Task) -> Task:
         """Insert a task into the database."""
         task.task_id = self._generate_id()
         self.cursor.execute(
-            """INSERT INTO tasks (id, title, description, status, created_at, priority)
-                          VALUES (?, ?, ?, ?, ?, ?)""",
+            """INSERT INTO tasks (id, title, description, status, priority, created_at, updated_at)
+                          VALUES (?, ?, ?, ?, ?, ?, ?)""",
             (
                 task.task_id,
                 task.title,
                 task.description,
                 task.status,
-                task.created_at,
                 task.priority,
+                task.created_at,
+                task.updated_at,
             ),
         )
         self.conn.commit()
 
         return task
 
-    def get_task(self, task_id: int) -> Task:
+    def get_task(self, task_id: int) -> Task | None:  # type: ignore[return]
         """Retrieve a task from the database."""
         self.cursor.execute("SELECT * FROM tasks WHERE id = ?", (task_id,))
         task = self.cursor.fetchone()
-        return Task(
-            task_id=task[0],
-            title=task[1],
-            description=task[2],
-            status=task[3],
-            created_at=task[4],
-            priority=task[5],
-        )
+        if task:
+            return Task(
+                task_id=task[0],
+                title=task[1],
+                description=task[2],
+                status=task[3],
+                priority=task[4],
+                created_at=task[5],
+                updated_at=task[6],
+            )
 
     def get_all_tasks(self) -> list[Task]:
         """Retrieve all tasks from the database."""
@@ -82,23 +92,25 @@ class TasksDatabase:
                 title=task[1],
                 description=task[2],
                 status=task[3],
-                created_at=task[4],
-                priority=task[5],
+                priority=task[4],
+                created_at=task[5],
+                updated_at=task[6],
             )
             for task in tasks
         ]
 
-    def update_task(self, task_id: int, updated_task: UpdateTask) -> Task:
+    def update_task(self, task_id: int, updated_task: UpdateTask) -> Task | None:
         """Update a task in the database."""
+        if not self.get_task(task_id):
+            return  # type: ignore[return-value]
+
         update_values = []
-        if updated_task.title is not None:
-            update_values.append(f"title='{updated_task.title}'")
-        if updated_task.description is not None:
-            update_values.append(f"description='{updated_task.description}'")
-        if updated_task.status is not None:
-            update_values.append(f"status='{updated_task.status}'")
-        if updated_task.priority is not None:
-            update_values.append(f"priority={updated_task.priority.value}")
+        for attr in updated_task.model_fields_set | {"updated_at"}:
+            value = getattr(updated_task, attr)
+            if isinstance(value, Enum):
+                value = value.value
+
+            update_values.append(f'{attr} = "{value}"')
 
         if update_values:
             update_query = "UPDATE tasks SET " + ", ".join(update_values) + f" WHERE id={task_id}"
@@ -112,26 +124,28 @@ class TasksDatabase:
         self.cursor.execute("DELETE FROM tasks WHERE id = ?", (task_id,))
         self.conn.commit()
 
-    def find_tasks_by_description(
-        self, subtitle: str | None = None, subdesc: str | None = None
-    ) -> list[Task]:
+    def find_tasks(  # type: ignore[return]
+        self, title: str | None = None, description: str | None = None
+    ) -> list[Task] | None:
         """Find tasks by substring of description."""
         self.cursor.execute(
             "SELECT * FROM tasks WHERE title LIKE ? AND description LIKE ?",
-            (f"%{subtitle or ''}%", f"%{subdesc or ''}%"),
+            (f"%{title or ''}%", f"%{description or ''}%"),
         )
         tasks = self.cursor.fetchall()
-        return [
-            Task(
-                task_id=task[0],
-                title=task[1],
-                description=task[2],
-                status=task[3],
-                created_at=task[4],
-                priority=task[5],
-            )
-            for task in tasks
-        ]
+        if tasks:
+            return [
+                Task(
+                    task_id=task[0],
+                    title=task[1],
+                    description=task[2],
+                    status=task[3],
+                    priority=task[4],
+                    created_at=task[5],
+                    updated_at=task[6],
+                )
+                for task in tasks
+            ]
 
 
 def get_db() -> Generator[TasksDatabase, Any, None]:
