@@ -5,7 +5,7 @@ on:
     branches:
       - main
       - "release-*"
-    tag:
+    tags:
       - "*"
   pull_request:
     - "*"
