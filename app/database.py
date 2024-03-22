@@ -35,6 +35,11 @@ class TasksDatabase:
         )
         self.conn.commit()
 
+    def _clear_tasks_table(self) -> None:
+        """Clear the tasks table."""
+        self.cursor.execute("DELETE FROM tasks")
+        self.conn.commit()
+
     def _generate_id(self) -> int:
         """Generate a unique ID for a task."""
         self.cursor.execute("SELECT MAX(id) FROM tasks")
