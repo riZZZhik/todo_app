@@ -1,0 +1,17 @@
+# Project ignores
+tasks.db
+
+# Editor ignores
+.idea/
+.vscode/settings.json
+
+# Python ignores
+poetry.lock
+__pycache__/
+dist/
+venv/
+.venv/
+.mypy_cache/
+
+# OS ignores
+.DS_Store
