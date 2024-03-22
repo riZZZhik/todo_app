@@ -1,6 +1,6 @@
 """This module defines the routes for the tasks API."""
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, status
 
 from ...database import TasksDatabase, get_db
 from ...models import Task, UpdateTask
@@ -8,7 +8,12 @@ from ...models import Task, UpdateTask
 router = APIRouter()
 
 
-@router.post("", response_model=Task, name="tasks:create_task")
+@router.post(
+    "",
+    response_model=Task,
+    status_code=status.HTTP_201_CREATED,
+    name="tasks:create_task",
+)
 def create_task(task: Task, db: TasksDatabase = Depends(get_db)) -> Task:
     """Create a new task.
 
@@ -22,8 +27,22 @@ def create_task(task: Task, db: TasksDatabase = Depends(get_db)) -> Task:
     return db.create_task(task)
 
 
+@router.get("/{task_id}", response_model=Task, name="tasks:get_task")
+def get_task(task_id: int, db: TasksDatabase = Depends(get_db)) -> Task:
+    """Retrieve a task by ID.
+
+    Args:
+        task_id: The ID of the task to retrieve.
+        db: The database dependency.
+
+    Returns:
+        The task with the given ID.
+    """
+    return db.get_task(task_id)
+
+
 @router.get("", response_model=list[Task], name="tasks:get_tasks")
-def read_tasks(
+def get_tasks(
     sort_by: str | None = None,
     top_n: int | None = None,
     db: TasksDatabase = Depends(get_db),
@@ -78,11 +97,15 @@ def find_tasks(
     Returns:
         A list of tasks that match the given substring.
     """
-    tasks = db.find_tasks_by_description(subtitle, subdesc)
-    return tasks
+    return db.find_tasks_by_description(subtitle, subdesc)
 
 
-@router.put("/{task_id}", response_model=Task, name="tasks:update_task")
+@router.put(
+    "/{task_id}",
+    response_model=Task,
+    status_code=status.HTTP_202_ACCEPTED,
+    name="tasks:update_task",
+)
 def update_task(
     task_id: int, updated_task: UpdateTask, db: TasksDatabase = Depends(get_db)
 ) -> Task:
@@ -95,8 +118,7 @@ def update_task(
     Returns:
         The updated task.
     """
-    task = db.update_task(task_id, updated_task)
-    return task
+    return db.update_task(task_id, updated_task)
 
 
 @router.delete("/{task_id}", name="tasks:delete_task")
