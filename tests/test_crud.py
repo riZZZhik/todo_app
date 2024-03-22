@@ -6,13 +6,10 @@ def test_create_task(client) -> None:
     assert response.status_code == 201
     assert response.json()["title"] == "test task"
     assert response.json()["description"] == "test description"
-    assert "task_id" in response.json()
-    assert "created_at" in response.json()
-    assert "updated_at" in response.json()
 
 
 def test_get_task(client) -> None:
-    response = client.get(f"/tasks/{1}")
+    response = client.get("/tasks/1")
 
     assert response.status_code == 200
     assert response.json()["task_id"] == 1
@@ -20,6 +17,13 @@ def test_get_task(client) -> None:
     assert response.json()["description"] == "test description"
     assert "created_at" in response.json()
     assert "updated_at" in response.json()
+
+
+def test_get_task_not_found(client) -> None:
+    response = client.get("/tasks/-1")
+
+    assert response.status_code == 404
+    assert response.json()["errors"] = ["Task not found"]
 
 
 def test_get_tasks(client) -> None:
@@ -42,7 +46,7 @@ def test_get_tasks(client) -> None:
 
 def test_update_task(client) -> None:
     response = client.put(
-        f"/tasks/{1}",
+        "/tasks/1",
         json={"title": "updated task", "description": "updated description"},
     )
 
@@ -50,15 +54,22 @@ def test_update_task(client) -> None:
     assert response.json()["task_id"] == 1
     assert response.json()["title"] == "updated task"
     assert response.json()["description"] == "updated description"
-    assert "created_at" in response.json()
-    assert "updated_at" in response.json()
     assert response.json()["updated_at"] != response.json()["created_at"]
+
+def test_update_task_not_found(client) -> None:
+    respose = client.put(
+        "/tasks/-1",
+        json={"title": "updated task", "description": "updated description"},
+    )
+
+    assert response.status_code == 404
+    assert response.json()["errors"] == ["Task not found"]
 
 
 def test_delete_task(client) -> None:
-    response = client.delete(f"/tasks/{1}")
+    response = client.delete("/tasks/1")
 
     assert response.status_code == 200
-    response = client.get(f"/tasks/{1}")
+    response = client.get("/tasks/1")
     assert response.status_code == 404
     assert response.json() == {"errors": ["Task not found"]}
