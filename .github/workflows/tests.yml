@@ -10,7 +10,7 @@ on:
       - "*"
 
 jobs:
-  lint:
+  tests:
     name: Run tests
 
     runs-on: ubuntu-22.04
