@@ -1,0 +1,30 @@
+name: Tests
+
+on:
+  push:
+    branches:
+      - "master"
+
+  pull_request:
+    branches:
+      - "*"
+
+jobs:
+  lint:
+    name: Run tests
+
+    runs-on: ubuntu-22.04
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install poetry
+        run: pipx install poetry
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.9"
+          cache: "poetry"
+
+      - run: poetry install
+      - run: poetry run pytest

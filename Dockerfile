@@ -6,8 +6,8 @@ WORKDIR $APP_HOME
 
 # Install dependencies
 RUN pip install poetry
-COPY Makefile pyproject.toml ./
-RUN make install
+COPY poetry.lock ./
+RUN poetry install
 
 # Copy code
 COPY app app
