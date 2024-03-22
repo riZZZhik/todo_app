@@ -52,6 +52,8 @@ def read_tasks(
             tasks.sort(key=lambda task: task.status, reverse=True)
         case "created_at":
             tasks.sort(key=lambda task: task.created_at)
+        case "updated_at":
+            tasks.sort(key=lambda task: task.updated_at)
         case "priority":
             pass
         case _:
