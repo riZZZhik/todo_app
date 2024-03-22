@@ -16,16 +16,28 @@ jobs:
     runs-on: ubuntu-22.04
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - uses: actions/setup-python@v5
+      - name: Install Poetry
+        run: |
+          pipx install poetry
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
-          python-version: "3.9"
-          cache: "poetry"
+          python-version: "3.11"
+          cache: poetry
+          cache-dependency-path: poetry.lock
 
-      - name: Install poetry
-        run: pipx install poetry
+      - name: Set Poetry environment
+        run: |
+          poetry env use 3.11
 
-      - run: poetry install
+      - name: Install dependencies
+        run: |
+          poetry install --no-root
 
-      - run: poetry run pytest
+      - name: Run
+        run: |
+          poetry run xxx
