@@ -44,7 +44,7 @@ class TasksDatabase:
         """Generate a unique ID for a task."""
         self.cursor.execute("SELECT MAX(id) FROM tasks")
         result = self.cursor.fetchone()
-        max_id = result[0] if result[0] else 0
+        max_id = result[0] or 0
         return max_id + 1
 
     def create_task(self, task: Task) -> Task:
