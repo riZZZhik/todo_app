@@ -3,11 +3,14 @@ name: Tests
 on:
   push:
     branches:
-      - "main"
-
+      - main
+      - "release-*"
+    tags:
+      - "*"
   pull_request:
     branches:
-      - "*"
+      - main
+      - "release-*"
 
 jobs:
   tests:
@@ -34,7 +37,7 @@ jobs:
       - name: Install dependencies
         run: poetry install --with tests,dev --no-root
 
-      - Run linters
+      - name: Run linters
         run: make lint
 
       - name: Run tests
