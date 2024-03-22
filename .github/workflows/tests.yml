@@ -8,7 +8,9 @@ on:
     tags:
       - "*"
   pull_request:
-    - "*"
+    branches:
+      - main
+      - "release-*"
 
 jobs:
   tests:
