@@ -5,7 +5,8 @@ ENV APP_HOME /app
 WORKDIR $APP_HOME
 
 # Install dependencies
-COPY pyproject.toml Makefile ./
+RUN pip install poetry
+COPY Makefile pyproject.toml ./
 RUN make install
 
 # Copy code
