@@ -76,4 +76,4 @@ run: ## Run the project
 
 .PHONY: dev.up
 dev.run: build ## Run in docker container detached
-	docker run -d -p 8000:8000 $(IMAGE_NAME)
+	docker run -d -p 8000:8000 -v $(PWD)/app:/app/app -v $(PWD)/tasks.db:/tasks.db $(IMAGE_NAME)
