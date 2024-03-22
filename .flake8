@@ -1,0 +1,39 @@
+[flake8]
+statistics = true
+doctests = True
+show-source = True
+count = True
+
+max-line-length = 100
+max-doc-length = 100
+
+max-line-complexity = 15
+max-cognitive-score = 15
+max-cognitive-complexity = 15
+max-annotation-complexity = 4
+max-function-expressions = 5
+
+max-imports = 20
+max-imported-names = 100
+
+max-local-variables = 8
+max-arguments = 10
+max-returns = 8
+
+max-try-body-length = 3
+
+extend-ignore =
+    C812,
+    C816,
+    E203,
+    W503
+
+extend-exclude =
+    venv
+    .venv
+    .git
+    __pycache__
+
+per-file-ignores =
+
+# B - C - D - E - W - F - I - N - P - Q - S - RST - DAR

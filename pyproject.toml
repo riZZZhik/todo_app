@@ -1,0 +1,36 @@
+[tool.poetry]
+name = "todo-app"
+version = "0.1.0"
+description = "FastAPI ToDo web application"
+authors = ["Dmitry Barsukoff <riZZZhik@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+fastapi = "^0.110.0"
+pydantic = "^2.6.4"
+uvicorn = "^0.29.0"
+asyncpg = "^0.29.0"
+
+[tool.poetry.group.dev.dependencies]
+bandit = {extras = ["toml"], version = "^1.7.5"}
+black = "^23.7.0"
+flake8 = "^6.0.0"
+flake8-commas = "^2.1.0"
+flake8-blind-except = "^0.2.1"
+flake8-comprehensions = "^3.10.0"
+flake8-pep3101 = "^2.0.0"
+flake8-docstrings = "^1.6.0"
+flake8-module-name = "^0.2.0"
+flake8-string-format = "^0.3.0"
+flake8-print = "^5.0.0"
+flake8-builtins = "^2.0.0"
+flake8-bugbear = "^22.9.23"
+isort = "^5.12.0"
+mypy = "^1.4.1"
+xenon = "^0.9.0"
+refurb = "^1.17.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
