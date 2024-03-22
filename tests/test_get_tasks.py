@@ -1,3 +1,11 @@
+def test_get_tasks_top_n(client) -> None:
+    response = client.get("/tasks/?top_n=1")
+
+    assert response.status_code == 200
+    assert isinstance(response.json(), list)
+    assert len(response.json()) == 1
+
+
 def test_get_tasks_sort_by_title(client) -> None:
     response = client.get("/tasks/?sort_by=title")
 

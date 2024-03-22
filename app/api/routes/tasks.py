@@ -27,6 +27,29 @@ def create_task(task: Task, db: TasksDatabase = Depends(get_db)) -> Task:
     return db.create_task(task)
 
 
+@router.get("/find", response_model=list[Task], name="tasks:find_tasks")
+def find_tasks(
+    title: str | None = None,
+    description: str | None = None,
+    db: TasksDatabase = Depends(get_db),
+) -> list[Task]:
+    """Find tasks by substring in their description.
+
+    Args:
+        title: The substring to search for in the task title.
+        description: The substring to search for in the task description.
+        db: The database dependency.
+
+    Returns:
+        A list of tasks that match the given substring.
+    """
+    tasks = db.find_tasks(title, description)
+    if tasks:
+        return tasks
+
+    raise HTTPException(status_code=404, detail="No tasks found")
+
+
 @router.get("/{task_id}", response_model=Task, name="tasks:get_task")
 def get_task(task_id: int, db: TasksDatabase = Depends(get_db)) -> Task:
     """Retrieve a task by ID.
@@ -85,25 +108,6 @@ def get_tasks(
     return tasks
 
 
-@router.get("/find", response_model=list[Task], name="tasks:find_task")
-def find_tasks(
-    subtitle: str | None = None,
-    subdesc: str | None = None,
-    db: TasksDatabase = Depends(get_db),
-) -> list[Task]:
-    """Find tasks by substring in their description.
-
-    Args:
-        subtitle: The substring to search for in the task title.
-        subdesc: The substring to search for in the task description.
-        db: The database dependency.
-
-    Returns:
-        A list of tasks that match the given substring.
-    """
-    return db.find_tasks_by_description(subtitle, subdesc)
-
-
 @router.put(
     "/{task_id}",
     response_model=Task,
@@ -122,7 +126,11 @@ def update_task(
     Returns:
         The updated task.
     """
-    return db.update_task(task_id, updated_task)
+    task = db.update_task(task_id, updated_task)
+    if task:
+        return task
+
+    raise HTTPException(status_code=404, detail="Task not found")
 
 
 @router.delete("/{task_id}", name="tasks:delete_task")

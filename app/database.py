@@ -67,7 +67,7 @@ class TasksDatabase:
 
         return task
 
-    def get_task(self, task_id: int) -> Task:
+    def get_task(self, task_id: int) -> Task | None:  # type: ignore[return]
         """Retrieve a task from the database."""
         self.cursor.execute("SELECT * FROM tasks WHERE id = ?", (task_id,))
         task = self.cursor.fetchone()
@@ -99,8 +99,11 @@ class TasksDatabase:
             for task in tasks
         ]
 
-    def update_task(self, task_id: int, updated_task: UpdateTask) -> Task:
+    def update_task(self, task_id: int, updated_task: UpdateTask) -> Task | None:
         """Update a task in the database."""
+        if not self.get_task(task_id):
+            return  # type: ignore[return-value]
+
         update_values = []
         for attr in updated_task.model_fields_set | {"updated_at"}:
             value = getattr(updated_task, attr)
@@ -123,27 +126,28 @@ class TasksDatabase:
         self.cursor.execute("DELETE FROM tasks WHERE id = ?", (task_id,))
         self.conn.commit()
 
-    def find_tasks_by_description(
-        self, subtitle: str | None = None, subdesc: str | None = None
-    ) -> list[Task]:
+    def find_tasks(  # type: ignore[return]
+        self, title: str | None = None, description: str | None = None
+    ) -> list[Task] | None:
         """Find tasks by substring of description."""
         self.cursor.execute(
             "SELECT * FROM tasks WHERE title LIKE ? AND description LIKE ?",
-            (f"%{subtitle or ''}%", f"%{subdesc or ''}%"),
+            (f"%{title or ''}%", f"%{description or ''}%"),
         )
         tasks = self.cursor.fetchall()
-        return [
-            Task(
-                task_id=task[0],
-                title=task[1],
-                description=task[2],
-                status=task[3],
-                priority=task[4],
-                created_at=task[5],
-                updated_at=task[6],
-            )
-            for task in tasks
-        ]
+        if tasks:
+            return [
+                Task(
+                    task_id=task[0],
+                    title=task[1],
+                    description=task[2],
+                    status=task[3],
+                    priority=task[4],
+                    created_at=task[5],
+                    updated_at=task[6],
+                )
+                for task in tasks
+            ]
 
 
 def get_db() -> Generator[TasksDatabase, Any, None]:
