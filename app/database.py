@@ -113,9 +113,7 @@ class TasksDatabase:
             update_values.append(f'{attr} = "{value}"')
 
         if update_values:
-            update_query = (
-                "UPDATE tasks SET " + ", ".join(update_values) + f" WHERE id={task_id}"
-            )
+            update_query = "UPDATE tasks SET " + ", ".join(update_values) + f" WHERE id={task_id}"
             self.cursor.execute(update_query)
             self.conn.commit()
 
