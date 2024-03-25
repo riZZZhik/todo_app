@@ -32,16 +32,16 @@ You can find the changelog in the [CHANGELOG.md](CHANGELOG.md) file.
 
 ### Docker
 
-1. Build image:
+1. Build the image:
 
 ```shell
    make build
 ```
 
-2. Run container:
+2. Run container with the app:
 
 ```shell
-   make run
+   make dev.run
 ```
 
 ### Python + Poetry
